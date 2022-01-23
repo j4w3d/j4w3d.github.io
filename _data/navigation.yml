@@ -1,0 +1,27 @@
+# main links
+main:
+  - title: "Home"
+    url: /
+    icon: fas fa-tachometer-alt
+
+  - title: "Articles"
+    url: /posts/
+    icon: far fa-file-alt
+
+  - title: "About"
+    url: /about/
+    icon: fas fa-child
+
+  - title: "Contact me"
+    url: /contact/
+    icon: fas fa-address-card
+
+
+  # - title: Categories
+  #   url: /categories/
+  #   icon: fas fa-th-large
+  # - title: Tags
+  #   url: /tags/
+  #   icon: fas fa-tags
+
+
