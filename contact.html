@@ -101,23 +101,23 @@
 	<section class="section">
   <div class="container">
     <div class="row justify-content-between">
-      <div class="col-lg-5">
+      <div class="col-lg-5" id="showResponse">
         <h2 class="mb-4">Contact Me</h2>
         <div class="content mb-4">Want to get connected or just say Hello?
 </div>
-        <form method="POST" action="#" class="row">
+        <form method="POST" action="https://app.headlessforms.cloud/api/v1/form-submission/uDQ0nMpV8n" class="row" onsubmit="submitForm(event)">
           <div class="col-md-6">
-            <input type="text" class="form-control mb-4" placeholder="Name" name="name" id="name">
+            <input type="text" class="form-control mb-4" placeholder="Name" name="name" id="name" minlength="3" required="true">
           </div>
           <div class="col-md-6">
-            <input type="email" class="form-control mb-4" placeholder="Email" name="email" id="email">
+            <input type="email" class="form-control mb-4" placeholder="Email" name="email" id="email" minlength="4" required="true">
           </div>
           <div class="col-12">
-            <input type="text" class="form-control mb-4" placeholder="Subject" name="subject" id="subject">
+            <input type="text" class="form-control mb-4" placeholder="Subject" name="subject" id="subject" minlength="3" required="true">
           </div>
           <div class="col-12">
             <textarea name="message" id="message" class="form-control mb-4" placeholder="Type You Message Here"
-              rows="5"></textarea>
+              rows="5" minlength="10" required="true"></textarea>
           </div>
           <div class="col-12">
             <button class="btn btn-primary btn-block" type="submit">Send</button>
@@ -131,19 +131,49 @@
   </div>
 </section>
 
+
+<script>
+
+  function submitForm(event) {
+    // Prevent the form from submitting.
+    event.preventDefault();
+
+    // Set url for submission and collect data.
+    const url = "https://app.headlessforms.cloud/api/v1/form-submission/uDQ0nMpV8n";
+
+    const formData = new FormData(event.target);
+
+    // Submit the formData.
+    const request = new XMLHttpRequest();
+
+    request.addEventListener("readystatechange", function() {
+      if(this.readyState === 4) {
+        // console.log(this.responseText);
+        document.getElementById("showResponse").style.color = "green";
+        document.getElementById("showResponse").style.fontStyle = "italic";
+        document.getElementById("showResponse").innerText = "Your message has been sent. Thank You!";
+      }
+    });
+
+    request.open("POST", url);
+    request.send(formData);
+  }
+
+  </script>
+
 	<!-- footer -->
-<footer class="py-4 bg-light border-top">
+<footer class="py-2 bg-light border-top">
   <div class="container">
     <div class="row justify-content-between align-items-center">
-      <div class="col-lg-4 text-center text-lg-left mb-4 mb-lg-0">
-        <a href="" class="d-block pb-3"><img src="/assets/images/logo.png" class="img-fluid" alt="Jawed Salim"></a>
+      <div class="col-lg-4 text-center text-lg-left mb-2 mb-lg-0">
+        <a href="" class="pb-1"><img src="/assets/images/logo.png" class="img-fluid" alt="Jawed Salim"></a>
       </div>
-      <div class="col-lg-4 text-center mb-4 mb-lg-0">
+      <div class="col-lg-4 text-center mb-1 mb-lg-0">
         <ul class="list-inline mb-0">
           <i>Want to get connected or just say Hello? Follow me on these social channels. </i>
         </ul>
       </div>
-      <div class="col-lg-4 text-lg-right text-center mb-4 mb-lg-0">
+      <div class="col-lg-4 text-lg-right text-center mb-2 mb-lg-0">
         <ul class="list-inline social-icon mb-0">
           
           <li class="list-inline-item"><a href="https://www.linkedin.com/in/j4w3d/"><i class="ti-linkedin"></i></a></li>
@@ -157,7 +187,7 @@
         </ul>
       </div>
     </div>
-    <div class="text-center mt-4">
+    <div class="text-center mt-2">
       <span><p>Copyright © 2022 Jawed Salim. Developed by <a href="https://getjekyllthemes.com">Getjekyllthemes</a></p>
 </span>
     </div>
