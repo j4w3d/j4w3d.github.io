@@ -1,4 +1,187 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.2">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2022-05-28T18:35:22+05:30</updated><id>http://localhost:4000/feed.xml</id><title type="html">Jawed Salim</title><subtitle>Hi, I'm Jawed Salim. A Senior DevOps Engineer @ StackExpress (APYL Software and Systems Ltd.) Noida (India) Kubernetes | Terraform | AWS | Ansible | Docker | Python</subtitle><entry><title type="html">Send Jenkins job/pipeline alerts on MS Teams without using any plugin</title><link href="http://localhost:4000/post/send-jenkins-job-pipeline-alerts-on-ms-teams-without-any-plugin.html" rel="alternate" type="text/html" title="Send Jenkins job/pipeline alerts on MS Teams without using any plugin" /><published>2022-05-24T10:05:58+05:30</published><updated>2022-05-24T10:05:58+05:30</updated><id>http://localhost:4000/post/send-jenkins-job-pipeline-alerts-on-ms-teams-without-any-plugin</id><content type="html" xml:base="http://localhost:4000/post/send-jenkins-job-pipeline-alerts-on-ms-teams-without-any-plugin.html"><![CDATA[<p>To send alerts on MS teams without using any plugin you can use <code class="language-plaintext highlighter-rouge">Curl</code> command or write a groovy funtion using Jenkins shared library option.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.2">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2022-09-17T17:59:04+05:30</updated><id>http://localhost:4000/feed.xml</id><title type="html">Jawed Salim</title><subtitle>Hi, I'm Jawed Salim. A Senior DevOps Engineer @ StackExpress (APYL Software and Systems Ltd.) Noida (India) Kubernetes | Terraform | AWS | Ansible | Docker | Python</subtitle><entry><title type="html">Deploy Chatwoot using Helm Chart</title><link href="http://localhost:4000/post/deploy-chatwoot-using-helm-chart.html" rel="alternate" type="text/html" title="Deploy Chatwoot using Helm Chart" /><published>2022-07-15T09:05:58+05:30</published><updated>2022-07-15T09:05:58+05:30</updated><id>http://localhost:4000/post/deploy-chatwoot-using-helm-chart</id><content type="html" xml:base="http://localhost:4000/post/deploy-chatwoot-using-helm-chart.html"><![CDATA[<p>Chatwoot is an open-source, self-hosted customer engagement suite. Chatwoot lets you view and manage your customer data, 
+communicate with them irrespective of which medium they use, and re-engage them based on their profile.</p>
+
+<p>For more info., <a href="https://www.chatwoot.com/">visit site</a></p>
+
+<h2 id="prerequisites">Prerequisites</h2>
+
+<ul>
+  <li>Kubernetes 1.16+</li>
+  <li>Helm 3.1.0+</li>
+  <li>PV provisioner support in the underlying infrastructure</li>
+</ul>
+
+<p>The helm installation will create 3 “Persistent Volume Claims” for redis, rails and postgres. Setup up a default “Storage Class” (for automatic PV) or create 3 “Persistent Volumes” with the size of 8GB, before installing chatwoot. If the “Persistent Volume Claims” do not claim the “Persistent Volumes”, leave storageClassName blank (inside the PV .yaml files).</p>
+
+<h2 id="create-namespace">Create Namespace</h2>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl create ns chatwoot
+</code></pre></div></div>
+
+<h2 id="installing-the-chart">Installing the chart</h2>
+
+<p>To access the chart, add the repo</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>helm repo add chatwoot https://chatwoot.github.io/charts
+<span class="s2">"chatwoot"</span> has been added to your repositories
+</code></pre></div></div>
+
+<p>Check that you have access to the chart.</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>helm search repo chatwoot
+NAME             	CHART VERSION	APP VERSION	DESCRIPTION
+chatwoot/chatwoot	0.8.6        	v2.5.0     	Open-source customer engagement suite, an alter...
+</code></pre></div></div>
+
+<p>Donwload the <code class="language-plaintext highlighter-rouge">values.yaml</code> file</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>wget <span class="nt">-O</span> values.yaml https://raw.githubusercontent.com/chatwoot/charts/main/charts/chatwoot/values.yaml
+</code></pre></div></div>
+
+<p>Open the <code class="language-plaintext highlighter-rouge">values.yaml</code> file in your favourite editor and update the config options</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="na">image</span><span class="pi">:</span>
+  <span class="na">repository</span><span class="pi">:</span> <span class="s">chatwoot/chatwoot</span>
+  <span class="na">tag</span><span class="pi">:</span> <span class="s">v2.5.0</span>
+  <span class="na">pullPolicy</span><span class="pi">:</span> <span class="s">IfNotPresent</span>
+
+<span class="na">services</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">chatwoot</span>
+  <span class="na">internlPort</span><span class="pi">:</span> <span class="m">3000</span>
+  <span class="na">targetPort</span><span class="pi">:</span> <span class="m">3000</span>
+  <span class="na">type</span><span class="pi">:</span> <span class="s">ClusterIP</span> <span class="c1"># you can use LoadBalancer</span>
+  <span class="na">annotations</span><span class="pi">:</span> <span class="pi">{}</span>
+    <span class="c1"># For example</span>
+    <span class="c1">#  service.beta.kubernetes.io/aws-load-balancer-type: external</span>
+    <span class="c1">#  service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip</span>
+    <span class="c1">#  service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing</span>
+<span class="s">..</span>
+<span class="s">..</span>
+<span class="na">ingress</span><span class="pi">:</span>
+  <span class="na">enabled</span><span class="pi">:</span> <span class="no">true</span>
+  <span class="c1"># For Kubernetes &gt;= 1.18 you should specify the ingress-controller via the field ingressClassName</span>
+  <span class="c1"># See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress</span>
+  <span class="c1"># ingressClassName: nginx</span>
+  <span class="na">annotations</span><span class="pi">:</span>
+    <span class="na">nginx.ingress.kubernetes.io/rewrite-target</span><span class="pi">:</span> <span class="s">/</span>
+    <span class="na">cert-manager.io/cluster-issuer</span><span class="pi">:</span> <span class="s">letsencrypt-prod</span>
+    <span class="na">nginx.ingress.kubernetes.io/server-snippet</span><span class="pi">:</span> <span class="pi">|</span>
+        <span class="s">underscores_in_headers on;</span>
+    <span class="c1"># kubernetes.io/ingress.class: nginx</span>
+    <span class="c1"># kubernetes.io/tls-acme: "true"</span>
+  <span class="na">hosts</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">host</span><span class="pi">:</span> <span class="s2">"</span><span class="s">chatwoot.&lt;your-domain-name&gt;"</span>
+      <span class="na">paths</span><span class="pi">:</span>
+        <span class="pi">-</span> <span class="na">path</span><span class="pi">:</span> <span class="s">/</span>
+          <span class="na">pathType</span><span class="pi">:</span> <span class="s">Prefix</span>
+          <span class="na">backend</span><span class="pi">:</span>
+            <span class="na">service</span><span class="pi">:</span>
+              <span class="na">name</span><span class="pi">:</span> <span class="s">chatwoot</span>
+              <span class="na">port</span><span class="pi">:</span>
+                <span class="na">number</span><span class="pi">:</span> <span class="m">3000</span>
+  <span class="na">tls</span><span class="pi">:</span>
+   <span class="pi">-</span> <span class="na">secretName</span><span class="pi">:</span> <span class="s">chatwoot-tls</span>
+     <span class="na">hosts</span><span class="pi">:</span>
+       <span class="pi">-</span> <span class="s2">"</span><span class="s">chatwoot.&lt;your-domain-name&gt;"</span>
+
+<span class="na">postgresql</span><span class="pi">:</span>
+  <span class="na">enabled</span><span class="pi">:</span> <span class="no">true</span>
+  <span class="na">nameOverride</span><span class="pi">:</span> <span class="s">chatwoot-postgresql</span>
+  <span class="na">postgresqlDatabase</span><span class="pi">:</span> <span class="s">chatwoot_production</span>
+  <span class="na">postgresqlUsername</span><span class="pi">:</span> <span class="s">postgres</span>
+  <span class="na">postgresqlPassword</span><span class="pi">:</span> <span class="s">postgres</span>
+  <span class="c1"># The following variables are only used when internal PG is disabled</span>
+  <span class="c1"># postgresqlHost: postgres</span>
+  <span class="c1"># postgresqlPort: 5432</span>
+  <span class="c1"># When defined the `postgresqlPassword` field is ignored</span>
+  <span class="c1"># existingSecret: secret-name</span>
+  <span class="c1"># existingSecretKey: postgresql-password</span>
+
+<span class="c1"># ENVIRONMENT VARIABLES</span>
+<span class="na">env</span><span class="pi">:</span>
+  <span class="na">FRONTEND_URL</span><span class="pi">:</span> <span class="s2">"</span><span class="s">chatwoot.&lt;your-domain-name&gt;"</span>
+  <span class="s">...</span>
+  <span class="s">...</span>
+
+  <span class="c1"># SMTP details</span>
+  <span class="na">SMTP_ADDRESS</span><span class="pi">:</span> <span class="s2">"</span><span class="s">&lt;smtp-hostname&gt;"</span>
+  <span class="na">SMTP_AUTHENTICATION</span><span class="pi">:</span> <span class="s">plain</span>
+  <span class="na">SMTP_ENABLE_STARTTLS_AUTO</span><span class="pi">:</span> <span class="no">true</span>
+  <span class="na">SMTP_OPENSSL_VERIFY_MODE</span><span class="pi">:</span> <span class="s">none</span>
+  <span class="na">SMTP_PASSWORD</span><span class="pi">:</span> <span class="s2">"</span><span class="s">&lt;smtp-user-pass&gt;"</span>
+  <span class="na">SMTP_PORT</span><span class="pi">:</span> <span class="m">587</span>
+  <span class="na">SMTP_USERNAME</span><span class="pi">:</span> <span class="s2">"</span><span class="s">&lt;smtp-user-name&gt;"</span>
+  <span class="s">...</span>
+  <span class="s">...</span>
+
+</code></pre></div></div>
+
+<p>Install the chart with the release name <code class="language-plaintext highlighter-rouge">chatwoot</code> and use above updated <code class="language-plaintext highlighter-rouge">values.yaml</code> file:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>helm <span class="nb">install </span>chatwoot chatwoot/chatwoot <span class="nt">-f</span> values.yaml <span class="nt">-n</span> chatwoot
+</code></pre></div></div>
+
+<p>Check status of helm release</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>helm list <span class="nt">-n</span> chatwoot
+
+NAME    	NAMESPACE	REVISION	UPDATED                             	STATUS  	CHART         	APP VERSION
+chatwoot	chatwoot 	1       	2022-05-24 16:46:39.470008 +0530 IST	deployed	chatwoot-0.8.6	v2.5.0
+</code></pre></div></div>
+
+<h2 id="deployment-status">Deployment Status</h2>
+
+<p>Chack Status of services, pods, deployments etc</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>get all <span class="nt">-n</span> chatwoot
+
+NAME                                     READY   STATUS    RESTARTS      AGE
+pod/chatwoot-chatwoot-postgresql-0       1/1     Running   1 <span class="o">(</span>42h ago<span class="o">)</span>   42h
+pod/chatwoot-chatwoot-redis-master-0     1/1     Running   2 <span class="o">(</span>42h ago<span class="o">)</span>   42h
+pod/chatwoot-chatwoot-redis-replicas-0   1/1     Running   2 <span class="o">(</span>42h ago<span class="o">)</span>   42h
+pod/chatwoot-chatwoot-redis-replicas-1   1/1     Running   0             42h
+pod/chatwoot-chatwoot-redis-replicas-2   1/1     Running   3 <span class="o">(</span>42h ago<span class="o">)</span>   42h
+pod/chatwoot-worker-6f5c5f966b-bppv2     1/1     Running   0             40h
+pod/chatwoot-worker-6f5c5f966b-psf85     1/1     Running   0             40h
+pod/chatwoot-web-6c77558f59-njbm9        1/1     Running   0             40h
+
+NAME                                            TYPE        CLUSTER-IP       EXTERNAL-IP   PORT<span class="o">(</span>S<span class="o">)</span>    AGE
+service/chatwoot-chatwoot-postgresql-headless   ClusterIP   None             &lt;none&gt;        5432/TCP   42h
+service/chatwoot-chatwoot-redis-headless        ClusterIP   None             &lt;none&gt;        6379/TCP   42h
+service/chatwoot                                ClusterIP   10.152.183.13    &lt;none&gt;        3000/TCP   42h
+service/chatwoot-chatwoot-redis-replicas        ClusterIP   10.152.183.185   &lt;none&gt;        6379/TCP   42h
+service/chatwoot-chatwoot-postgresql            ClusterIP   10.152.183.116   &lt;none&gt;        5432/TCP   42h
+service/chatwoot-chatwoot-redis-master          ClusterIP   10.152.183.29    &lt;none&gt;        6379/TCP   42h
+
+NAME                              READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/chatwoot-worker   2/2     2            2           42h
+deployment.apps/chatwoot-web      1/1     1            1           42h
+
+NAME                                         DESIRED   CURRENT   READY   AGE
+replicaset.apps/chatwoot-worker-6f5c5f966b   2         2         2       42h
+replicaset.apps/chatwoot-web-6c77558f59      1         1         1       42h
+
+NAME                                                READY   AGE
+statefulset.apps/chatwoot-chatwoot-postgresql       1/1     42h
+statefulset.apps/chatwoot-chatwoot-redis-master     1/1     42h
+statefulset.apps/chatwoot-chatwoot-redis-replicas   3/3     42h
+
+</code></pre></div></div>
+
+<p>Check ingress</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="nv">$ </span>kubect get ingress <span class="nt">-n</span> chatwoot
+NAME       CLASS    HOSTS                     ADDRESS     PORTS     AGE
+chatwoot   public   chatwoot.&lt;your-domain-name&gt;   127.0.0.1   80, 443   42h
+</code></pre></div></div>
+
+<h2 id="references">References</h2>
+
+<ul>
+  <li><a href="https://www.chatwoot.com/docs/self-hosted/deployment/helm-charts">Deploy Chatwoot using Helm Charts</a></li>
+</ul>]]></content><author><name>Jawed Salim</name></author><category term="chatwoot" /><category term="kubernetes" /><summary type="html"><![CDATA[Setup chatwoot on kubernetes cluster using helm chart]]></summary></entry><entry><title type="html">Send Jenkins job/pipeline alerts on MS Teams without using any plugin</title><link href="http://localhost:4000/post/send-jenkins-job-pipeline-alerts-on-ms-teams-without-any-plugin.html" rel="alternate" type="text/html" title="Send Jenkins job/pipeline alerts on MS Teams without using any plugin" /><published>2022-05-24T10:05:58+05:30</published><updated>2022-05-24T10:05:58+05:30</updated><id>http://localhost:4000/post/send-jenkins-job-pipeline-alerts-on-ms-teams-without-any-plugin</id><content type="html" xml:base="http://localhost:4000/post/send-jenkins-job-pipeline-alerts-on-ms-teams-without-any-plugin.html"><![CDATA[<p>To send alerts on MS teams without using any plugin you can use <code class="language-plaintext highlighter-rouge">Curl</code> command or write a groovy funtion using Jenkins shared library option.</p>
 
 <ul>
   <li>Configure incoming webhook on MS teams</li>
@@ -447,23 +630,7 @@ vault-2                                 1/1     Running   0          6m49s
 <ul>
   <li>Enable TLS</li>
   <li>Use GCP KMS for auto unsealing</li>
-</ul>]]></content><author><name>Jawed Salim</name></author><category term="Vault-Consul" /><summary type="html"><![CDATA[Vault Consul Setup on k8s in HA mode]]></summary></entry><entry><title type="html">Welcome to Jekyll!</title><link href="http://localhost:4000/post/welcome-to-jekyll.html" rel="alternate" type="text/html" title="Welcome to Jekyll!" /><published>2020-08-18T10:42:58+05:30</published><updated>2020-08-18T10:42:58+05:30</updated><id>http://localhost:4000/post/welcome-to-jekyll</id><content type="html" xml:base="http://localhost:4000/post/welcome-to-jekyll.html"><![CDATA[<p>You’ll find this post in your <code class="language-plaintext highlighter-rouge">_posts</code> directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run <code class="language-plaintext highlighter-rouge">jekyll serve</code>, which launches a web server and auto-regenerates your site when a file is updated.</p>
-
-<p>Jekyll requires blog post files to be named according to the following format:</p>
-
-<p><code class="language-plaintext highlighter-rouge">YEAR-MONTH-DAY-title.MARKUP</code></p>
-
-<p>Where <code class="language-plaintext highlighter-rouge">YEAR</code> is a four-digit number, <code class="language-plaintext highlighter-rouge">MONTH</code> and <code class="language-plaintext highlighter-rouge">DAY</code> are both two-digit numbers, and <code class="language-plaintext highlighter-rouge">MARKUP</code> is the file extension representing the format used in the file. After that, include the necessary front matter. Take a look at the source for this post to get an idea about how it works.</p>
-
-<p>Jekyll also offers powerful support for code snippets:</p>
-
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">def</span> <span class="nf">print_hi</span><span class="p">(</span><span class="nb">name</span><span class="p">)</span>
-  <span class="nb">puts</span> <span class="s2">"Hi, </span><span class="si">#{</span><span class="nb">name</span><span class="si">}</span><span class="s2">"</span>
-<span class="k">end</span>
-<span class="n">print_hi</span><span class="p">(</span><span class="s1">'Tom'</span><span class="p">)</span>
-<span class="c1">#=&gt; prints 'Hi, Tom' to STDOUT.</span></code></pre></figure>
-
-<p>Check out the <a href="https://jekyllrb.com/docs/home">Jekyll docs</a> for more info on how to get the most out of Jekyll. File all bugs/feature requests at <a href="https://github.com/jekyll/jekyll">Jekyll’s GitHub repo</a>. If you have questions, you can ask them on <a href="https://talk.jekyllrb.com/">Jekyll Talk</a>.</p>]]></content><author><name>John Doe</name></author><category term="Travels" /><summary type="html"><![CDATA[This is meta description]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="http://localhost:4000/assets/images/post/post-1.jpg" /><media:content medium="image" url="http://localhost:4000/assets/images/post/post-1.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">My awesome blog post</title><link href="http://localhost:4000/post/my-awesome-blog-post.4.html" rel="alternate" type="text/html" title="My awesome blog post" /><published>2020-08-08T10:42:58+05:30</published><updated>2020-08-08T10:42:58+05:30</updated><id>http://localhost:4000/post/my-awesome-blog-post.4</id><content type="html" xml:base="http://localhost:4000/post/my-awesome-blog-post.4.html"><![CDATA[<p>Are you Developer and recently started your own business and Already made a website to ensure online presence and wants to reach more people. but you are not getting as much as response from your targeted customer or you are unable to reach them. SEO(Search engine optimization)is the cheapest way to reach your customer or client. After 2000 the Internet is more easy access to common people and most of the netizens to find out information search on google/yahoo/bing like a search engine. So if your site ranks at the top of the SERP for your target keywords then sure you will get more valuable traffic to your site and it will help you a lot to grow your business.</p>
+</ul>]]></content><author><name>Jawed Salim</name></author><category term="Vault-Consul" /><summary type="html"><![CDATA[Vault Consul Setup on k8s in HA mode]]></summary></entry><entry><title type="html">My awesome blog post</title><link href="http://localhost:4000/post/my-awesome-blog-post.html" rel="alternate" type="text/html" title="My awesome blog post" /><published>2020-08-08T10:42:58+05:30</published><updated>2020-08-08T10:42:58+05:30</updated><id>http://localhost:4000/post/my-awesome-blog-post</id><content type="html" xml:base="http://localhost:4000/post/my-awesome-blog-post.html"><![CDATA[<p>Are you Developer and recently started your own business and Already made a website to ensure online presence and wants to reach more people. but you are not getting as much as response from your targeted customer or you are unable to reach them. SEO(Search engine optimization)is the cheapest way to reach your customer or client. After 2000 the Internet is more easy access to common people and most of the netizens to find out information search on google/yahoo/bing like a search engine. So if your site ranks at the top of the SERP for your target keywords then sure you will get more valuable traffic to your site and it will help you a lot to grow your business.</p>
 
 <p>Above Paragraph, you see SERP or Keywords that are common SEO Term so Before starting learning SEO let’s learn the term used by the SEO expert. It will smoothen your learning journey. Or if you are wishing to hire an SEO guy it will help you his task he/she doing and understand he/she going on the right path. So not making delay let dive…</p>
 
@@ -481,112 +648,4 @@ vault-2                                 1/1     Running   0          6m49s
   <li>
     <p>New Algorithm: Improving search quality google and other search engines regularly bringing new algorithms. All new algorithm has its special purpose to serve in the total search engine working process.</p>
   </li>
-</ul>]]></content><author><name>Mark Dinn</name></author><category term="Hugo" /><summary type="html"><![CDATA[This is meta description]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="http://localhost:4000/assets/images/post/post-1.jpg" /><media:content medium="image" url="http://localhost:4000/assets/images/post/post-1.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">My awesome blog post</title><link href="http://localhost:4000/post/my-awesome-blog-post.html" rel="alternate" type="text/html" title="My awesome blog post" /><published>2020-08-08T10:42:58+05:30</published><updated>2020-08-08T10:42:58+05:30</updated><id>http://localhost:4000/post/my-awesome-blog-post</id><content type="html" xml:base="http://localhost:4000/post/my-awesome-blog-post.html"><![CDATA[<p>Are you Developer and recently started your own business and Already made a website to ensure online presence and wants to reach more people. but you are not getting as much as response from your targeted customer or you are unable to reach them. SEO(Search engine optimization)is the cheapest way to reach your customer or client. After 2000 the Internet is more easy access to common people and most of the netizens to find out information search on google/yahoo/bing like a search engine. So if your site ranks at the top of the SERP for your target keywords then sure you will get more valuable traffic to your site and it will help you a lot to grow your business.</p>
-
-<p>Above Paragraph, you see SERP or Keywords that are common SEO Term so Before starting learning SEO let’s learn the term used by the SEO expert. It will smoothen your learning journey. Or if you are wishing to hire an SEO guy it will help you his task he/she doing and understand he/she going on the right path. So not making delay let dive…</p>
-
-<p><strong>Algorithm:</strong> “Algorithm is a process or set of rules to be followed in calculations or other problem-solving operations, especially by a computer.” It is its definition. In SEO we basically mean A very sophisticated and complex program used by the search engine to find out data and indexing it, And when a user gives a data query this program also decides the best result to place in the SERP in order. All search engines use multiple algorithms combination on their data collection and result giving process in different stages.</p>
-
-<p><strong>Algorithm Change:</strong> All the search engine service providers always try to give the best results to their users. So they always working on updating, refreshing or making and implementing new algorithms. The search engine service provider never revealed the exact date of rolling out any updates or new algorithms to make an effective date. Normally they give a boundary of time like this week or this month, we are going to rolling out a major update or applying new this algorithm. They give this new algorithm a name and they always call it by the given name. Like, google spider, Google panda, etc. Most of the time After one to two week we can see and understand the update or change impact but sometimes it also happens quicker also.</p>
-
-<ul>
-  <li>
-    <p>Algorithm Update: Search Engines regularly making minor changes in their system they normally don’t give an official announcement. But SEO related blogs and journals give the news what the changes made. So Keep update regular visit this industry-related community is important. And when the Major update come You must observe your ranking behavior and if you find you’ve got the penalty then quickly take necessary step undereating the guidelines given by search engine company.</p>
-  </li>
-  <li>
-    <p>Algorithm Refresh: Search engine operator after a regular interval re-run the existing algorithm to find out the new spammer.</p>
-  </li>
-  <li>
-    <p>New Algorithm: Improving search quality google and other search engines regularly bringing new algorithms. All new algorithm has its special purpose to serve in the total search engine working process.</p>
-  </li>
-</ul>]]></content><author><name>Mark Dinn</name></author><category term="Meta Data" /><summary type="html"><![CDATA[This is meta description]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="http://localhost:4000/assets/images/post/post-1.jpg" /><media:content medium="image" url="http://localhost:4000/assets/images/post/post-1.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">My awesome blog post</title><link href="http://localhost:4000/post/my-awesome-blog-post.2.html" rel="alternate" type="text/html" title="My awesome blog post" /><published>2020-08-08T10:42:58+05:30</published><updated>2020-08-08T10:42:58+05:30</updated><id>http://localhost:4000/post/my-awesome-blog-post.2</id><content type="html" xml:base="http://localhost:4000/post/my-awesome-blog-post.2.html"><![CDATA[<p>Are you Developer and recently started your own business and Already made a website to ensure online presence and wants to reach more people. but you are not getting as much as response from your targeted customer or you are unable to reach them. SEO(Search engine optimization)is the cheapest way to reach your customer or client. After 2000 the Internet is more easy access to common people and most of the netizens to find out information search on google/yahoo/bing like a search engine. So if your site ranks at the top of the SERP for your target keywords then sure you will get more valuable traffic to your site and it will help you a lot to grow your business.</p>
-
-<p>Above Paragraph, you see SERP or Keywords that are common SEO Term so Before starting learning SEO let’s learn the term used by the SEO expert. It will smoothen your learning journey. Or if you are wishing to hire an SEO guy it will help you his task he/she doing and understand he/she going on the right path. So not making delay let dive…</p>
-
-<p><strong>Algorithm:</strong> “Algorithm is a process or set of rules to be followed in calculations or other problem-solving operations, especially by a computer.” It is its definition. In SEO we basically mean A very sophisticated and complex program used by the search engine to find out data and indexing it, And when a user gives a data query this program also decides the best result to place in the SERP in order. All search engines use multiple algorithms combination on their data collection and result giving process in different stages.</p>
-
-<p><strong>Algorithm Change:</strong> All the search engine service providers always try to give the best results to their users. So they always working on updating, refreshing or making and implementing new algorithms. The search engine service provider never revealed the exact date of rolling out any updates or new algorithms to make an effective date. Normally they give a boundary of time like this week or this month, we are going to rolling out a major update or applying new this algorithm. They give this new algorithm a name and they always call it by the given name. Like, google spider, Google panda, etc. Most of the time After one to two week we can see and understand the update or change impact but sometimes it also happens quicker also.</p>
-
-<ul>
-  <li>
-    <p>Algorithm Update: Search Engines regularly making minor changes in their system they normally don’t give an official announcement. But SEO related blogs and journals give the news what the changes made. So Keep update regular visit this industry-related community is important. And when the Major update come You must observe your ranking behavior and if you find you’ve got the penalty then quickly take necessary step undereating the guidelines given by search engine company.</p>
-  </li>
-  <li>
-    <p>Algorithm Refresh: Search engine operator after a regular interval re-run the existing algorithm to find out the new spammer.</p>
-  </li>
-  <li>
-    <p>New Algorithm: Improving search quality google and other search engines regularly bringing new algorithms. All new algorithm has its special purpose to serve in the total search engine working process.</p>
-  </li>
-</ul>]]></content><author><name>Mark Dinn</name></author><category term="Meta Data" /><summary type="html"><![CDATA[This is meta description]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="http://localhost:4000/assets/images/post/post-2.jpg" /><media:content medium="image" url="http://localhost:4000/assets/images/post/post-2.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">My awesome second blog post</title><link href="http://localhost:4000/post/my-awesome-blog-post-4.html" rel="alternate" type="text/html" title="My awesome second blog post" /><published>2020-08-08T10:42:58+05:30</published><updated>2020-08-08T10:42:58+05:30</updated><id>http://localhost:4000/post/my-awesome-blog-post-4</id><content type="html" xml:base="http://localhost:4000/post/my-awesome-blog-post-4.html"><![CDATA[<p>Are you Developer and recently started your own business and Already made a website to ensure online presence and wants to reach more people. but you are not getting as much as response from your targeted customer or you are unable to reach them. SEO(Search engine optimization)is the cheapest way to reach your customer or client. After 2000 the Internet is more easy access to common people and most of the netizens to find out information search on google/yahoo/bing like a search engine. So if your site ranks at the top of the SERP for your target keywords then sure you will get more valuable traffic to your site and it will help you a lot to grow your business.</p>
-
-<p>Above Paragraph, you see SERP or Keywords that are common SEO Term so Before starting learning SEO let’s learn the term used by the SEO expert. It will smoothen your learning journey. Or if you are wishing to hire an SEO guy it will help you his task he/she doing and understand he/she going on the right path. So not making delay let dive…</p>
-
-<p><strong>Algorithm:</strong> “Algorithm is a process or set of rules to be followed in calculations or other problem-solving operations, especially by a computer.” It is its definition. In SEO we basically mean A very sophisticated and complex program used by the search engine to find out data and indexing it, And when a user gives a data query this program also decides the best result to place in the SERP in order. All search engines use multiple algorithms combination on their data collection and result giving process in different stages.</p>
-
-<p><strong>Algorithm Change:</strong> All the search engine service providers always try to give the best results to their users. So they always working on updating, refreshing or making and implementing new algorithms. The search engine service provider never revealed the exact date of rolling out any updates or new algorithms to make an effective date. Normally they give a boundary of time like this week or this month, we are going to rolling out a major update or applying new this algorithm. They give this new algorithm a name and they always call it by the given name. Like, google spider, Google panda, etc. Most of the time After one to two week we can see and understand the update or change impact but sometimes it also happens quicker also.</p>
-
-<ul>
-  <li>
-    <p>Algorithm Update: Search Engines regularly making minor changes in their system they normally don’t give an official announcement. But SEO related blogs and journals give the news what the changes made. So Keep update regular visit this industry-related community is important. And when the Major update come You must observe your ranking behavior and if you find you’ve got the penalty then quickly take necessary step undereating the guidelines given by search engine company.</p>
-  </li>
-  <li>
-    <p>Algorithm Refresh: Search engine operator after a regular interval re-run the existing algorithm to find out the new spammer.</p>
-  </li>
-  <li>
-    <p>New Algorithm: Improving search quality google and other search engines regularly bringing new algorithms. All new algorithm has its special purpose to serve in the total search engine working process.</p>
-  </li>
-</ul>]]></content><author><name>John Doe</name></author><category term="Jekyll" /><summary type="html"><![CDATA[This is meta description]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="http://localhost:4000/assets/images/post/post-3.jpg" /><media:content medium="image" url="http://localhost:4000/assets/images/post/post-3.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">My awesome second blog post</title><link href="http://localhost:4000/post/my-awesome-blog-post-5.html" rel="alternate" type="text/html" title="My awesome second blog post" /><published>2020-08-08T10:42:58+05:30</published><updated>2020-08-08T10:42:58+05:30</updated><id>http://localhost:4000/post/my-awesome-blog-post-5</id><content type="html" xml:base="http://localhost:4000/post/my-awesome-blog-post-5.html"><![CDATA[<p>Are you Developer and recently started your own business and Already made a website to ensure online presence and wants to reach more people. but you are not getting as much as response from your targeted customer or you are unable to reach them. SEO(Search engine optimization)is the cheapest way to reach your customer or client. After 2000 the Internet is more easy access to common people and most of the netizens to find out information search on google/yahoo/bing like a search engine. So if your site ranks at the top of the SERP for your target keywords then sure you will get more valuable traffic to your site and it will help you a lot to grow your business.</p>
-
-<p>Above Paragraph, you see SERP or Keywords that are common SEO Term so Before starting learning SEO let’s learn the term used by the SEO expert. It will smoothen your learning journey. Or if you are wishing to hire an SEO guy it will help you his task he/she doing and understand he/she going on the right path. So not making delay let dive…</p>
-
-<p><strong>Algorithm:</strong> “Algorithm is a process or set of rules to be followed in calculations or other problem-solving operations, especially by a computer.” It is its definition. In SEO we basically mean A very sophisticated and complex program used by the search engine to find out data and indexing it, And when a user gives a data query this program also decides the best result to place in the SERP in order. All search engines use multiple algorithms combination on their data collection and result giving process in different stages.</p>
-
-<p><strong>Algorithm Change:</strong> All the search engine service providers always try to give the best results to their users. So they always working on updating, refreshing or making and implementing new algorithms. The search engine service provider never revealed the exact date of rolling out any updates or new algorithms to make an effective date. Normally they give a boundary of time like this week or this month, we are going to rolling out a major update or applying new this algorithm. They give this new algorithm a name and they always call it by the given name. Like, google spider, Google panda, etc. Most of the time After one to two week we can see and understand the update or change impact but sometimes it also happens quicker also.</p>
-
-<ul>
-  <li>
-    <p>Algorithm Update: Search Engines regularly making minor changes in their system they normally don’t give an official announcement. But SEO related blogs and journals give the news what the changes made. So Keep update regular visit this industry-related community is important. And when the Major update come You must observe your ranking behavior and if you find you’ve got the penalty then quickly take necessary step undereating the guidelines given by search engine company.</p>
-  </li>
-  <li>
-    <p>Algorithm Refresh: Search engine operator after a regular interval re-run the existing algorithm to find out the new spammer.</p>
-  </li>
-  <li>
-    <p>New Algorithm: Improving search quality google and other search engines regularly bringing new algorithms. All new algorithm has its special purpose to serve in the total search engine working process.</p>
-  </li>
-</ul>]]></content><author><name>Mark Dinn</name></author><category term="Hugo" /><summary type="html"><![CDATA[This is meta description]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="http://localhost:4000/assets/images/post/post-3.jpg" /><media:content medium="image" url="http://localhost:4000/assets/images/post/post-3.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">My awesome second blog post</title><link href="http://localhost:4000/post/my-awesome-blog-post-6.html" rel="alternate" type="text/html" title="My awesome second blog post" /><published>2020-08-08T10:42:58+05:30</published><updated>2020-08-08T10:42:58+05:30</updated><id>http://localhost:4000/post/my-awesome-blog-post-6</id><content type="html" xml:base="http://localhost:4000/post/my-awesome-blog-post-6.html"><![CDATA[<p>Are you Developer and recently started your own business and Already made a website to ensure online presence and wants to reach more people. but you are not getting as much as response from your targeted customer or you are unable to reach them. SEO(Search engine optimization)is the cheapest way to reach your customer or client. After 2000 the Internet is more easy access to common people and most of the netizens to find out information search on google/yahoo/bing like a search engine. So if your site ranks at the top of the SERP for your target keywords then sure you will get more valuable traffic to your site and it will help you a lot to grow your business.</p>
-
-<p>Above Paragraph, you see SERP or Keywords that are common SEO Term so Before starting learning SEO let’s learn the term used by the SEO expert. It will smoothen your learning journey. Or if you are wishing to hire an SEO guy it will help you his task he/she doing and understand he/she going on the right path. So not making delay let dive…</p>
-
-<p><strong>Algorithm:</strong> “Algorithm is a process or set of rules to be followed in calculations or other problem-solving operations, especially by a computer.” It is its definition. In SEO we basically mean A very sophisticated and complex program used by the search engine to find out data and indexing it, And when a user gives a data query this program also decides the best result to place in the SERP in order. All search engines use multiple algorithms combination on their data collection and result giving process in different stages.</p>
-
-<p><strong>Algorithm Change:</strong> All the search engine service providers always try to give the best results to their users. So they always working on updating, refreshing or making and implementing new algorithms. The search engine service provider never revealed the exact date of rolling out any updates or new algorithms to make an effective date. Normally they give a boundary of time like this week or this month, we are going to rolling out a major update or applying new this algorithm. They give this new algorithm a name and they always call it by the given name. Like, google spider, Google panda, etc. Most of the time After one to two week we can see and understand the update or change impact but sometimes it also happens quicker also.</p>
-
-<ul>
-  <li>
-    <p>Algorithm Update: Search Engines regularly making minor changes in their system they normally don’t give an official announcement. But SEO related blogs and journals give the news what the changes made. So Keep update regular visit this industry-related community is important. And when the Major update come You must observe your ranking behavior and if you find you’ve got the penalty then quickly take necessary step undereating the guidelines given by search engine company.</p>
-  </li>
-  <li>
-    <p>Algorithm Refresh: Search engine operator after a regular interval re-run the existing algorithm to find out the new spammer.</p>
-  </li>
-  <li>
-    <p>New Algorithm: Improving search quality google and other search engines regularly bringing new algorithms. All new algorithm has its special purpose to serve in the total search engine working process.</p>
-  </li>
-</ul>]]></content><author><name>John Doe</name></author><category term="Development Tools" /><summary type="html"><![CDATA[This is meta description]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="http://localhost:4000/assets/images/post/post-1.jpg" /><media:content medium="image" url="http://localhost:4000/assets/images/post/post-1.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">My awesome blog post</title><link href="http://localhost:4000/post/my-awesome-blog-post.3.html" rel="alternate" type="text/html" title="My awesome blog post" /><published>2020-08-08T10:42:58+05:30</published><updated>2020-08-08T10:42:58+05:30</updated><id>http://localhost:4000/post/my-awesome-blog-post.3</id><content type="html" xml:base="http://localhost:4000/post/my-awesome-blog-post.3.html"><![CDATA[<p>Are you Developer and recently started your own business and Already made a website to ensure online presence and wants to reach more people. but you are not getting as much as response from your targeted customer or you are unable to reach them. SEO(Search engine optimization)is the cheapest way to reach your customer or client. After 2000 the Internet is more easy access to common people and most of the netizens to find out information search on google/yahoo/bing like a search engine. So if your site ranks at the top of the SERP for your target keywords then sure you will get more valuable traffic to your site and it will help you a lot to grow your business.</p>
-
-<p>Above Paragraph, you see SERP or Keywords that are common SEO Term so Before starting learning SEO let’s learn the term used by the SEO expert. It will smoothen your learning journey. Or if you are wishing to hire an SEO guy it will help you his task he/she doing and understand he/she going on the right path. So not making delay let dive…</p>
-
-<p><strong>Algorithm:</strong> “Algorithm is a process or set of rules to be followed in calculations or other problem-solving operations, especially by a computer.” It is its definition. In SEO we basically mean A very sophisticated and complex program used by the search engine to find out data and indexing it, And when a user gives a data query this program also decides the best result to place in the SERP in order. All search engines use multiple algorithms combination on their data collection and result giving process in different stages.</p>
-
-<p><strong>Algorithm Change:</strong> All the search engine service providers always try to give the best results to their users. So they always working on updating, refreshing or making and implementing new algorithms. The search engine service provider never revealed the exact date of rolling out any updates or new algorithms to make an effective date. Normally they give a boundary of time like this week or this month, we are going to rolling out a major update or applying new this algorithm. They give this new algorithm a name and they always call it by the given name. Like, google spider, Google panda, etc. Most of the time After one to two week we can see and understand the update or change impact but sometimes it also happens quicker also.</p>
-
-<ul>
-  <li>
-    <p>Algorithm Update: Search Engines regularly making minor changes in their system they normally don’t give an official announcement. But SEO related blogs and journals give the news what the changes made. So Keep update regular visit this industry-related community is important. And when the Major update come You must observe your ranking behavior and if you find you’ve got the penalty then quickly take necessary step undereating the guidelines given by search engine company.</p>
-  </li>
-  <li>
-    <p>Algorithm Refresh: Search engine operator after a regular interval re-run the existing algorithm to find out the new spammer.</p>
-  </li>
-  <li>
-    <p>New Algorithm: Improving search quality google and other search engines regularly bringing new algorithms. All new algorithm has its special purpose to serve in the total search engine working process.</p>
-  </li>
-</ul>]]></content><author><name>John Doe</name></author><category term="Hugo" /><summary type="html"><![CDATA[This is meta description]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="http://localhost:4000/assets/images/post/post-3.jpg" /><media:content medium="image" url="http://localhost:4000/assets/images/post/post-3.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry></feed>
+</ul>]]></content><author><name>Mark Dinn</name></author><category term="Meta Data" /><summary type="html"><![CDATA[This is meta description]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="http://localhost:4000/assets/images/post/post-1.jpg" /><media:content medium="image" url="http://localhost:4000/assets/images/post/post-1.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry></feed>
